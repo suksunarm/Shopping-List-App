@@ -1,7 +1,9 @@
 import 'package:flutter/material.dart';
-// import 'package:shopping_list/data/dummy_items.dart';
+import 'package:shopping_list/data/categories.dart';
 import 'package:shopping_list/models/grocery_item.dart';
 import 'package:shopping_list/widgets/new_item.dart';
+import 'package:http/http.dart' as http;
+import 'dart:convert';
 
 class GroceryList extends StatefulWidget {
   const GroceryList({super.key});
@@ -11,7 +13,104 @@ class GroceryList extends StatefulWidget {
 }
 
 class _GroceryListState extends State<GroceryList> {
-  final List<GroceryItem> _groceryItems = [];
+  List<GroceryItem> _groceryItems = [];
+  var _isLoading = true;
+  String? _error;
+
+  @override
+  void initState() {
+    super.initState(); // คล้ายๆ เหมือน useEffect
+    _loadItems();
+  }
+
+
+  void _showModal(BuildContext context , GroceryItem item) {
+    final index  = _groceryItems.indexOf(item);
+    final name = item.name;
+    final quantity = item.quantity;
+
+    showDialog(
+      context: context,
+      barrierDismissible: false, // ไม่ให้ปิดเมื่อคลิกที่ด้านนอกโมดอล
+      builder: (BuildContext context) {
+        return AlertDialog(
+          title: const Text('Do you want to delete',
+          style: TextStyle(fontSize: 24 , fontWeight: FontWeight.bold),
+          ),
+          content:  Text('Your groceries are ${name} '+'\n'+' quantity : ${quantity}',
+          style: const TextStyle(fontSize: 20),
+          ),
+          actions: <Widget>[
+            TextButton(
+              onPressed: () {
+                _removeItem(_groceryItems[index]);
+                Navigator.of(context).pop();
+              },
+              child:const Text('Yes',
+              style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+              ),
+            ),
+            TextButton(
+              onPressed: () {
+                Navigator.of(context).pop(); // ปิดโมดอล
+              },
+              child:const Text('No',
+              style: TextStyle(fontSize: 18 , fontWeight: FontWeight.bold),
+              ),
+            ),
+          ],
+        );
+      },
+    );
+    }
+
+  void _loadItems() async {
+    final url = Uri.https(
+        'flutter-shopping-list-56d69-default-rtdb.firebaseio.com',
+        'shopping-list.json');
+    try {
+      final response = await http.get(url);
+
+      if (response.statusCode >= 400) {
+        setState(() {
+          _error = 'Failed to fetch data. Please try again later!';
+        });
+      }
+
+      if (response.body == 'null') {
+        setState(() {
+          _isLoading = false;
+        });
+        return;
+      }
+      final Map<String, dynamic> listData = json.decode(response
+          .body); //ถอดรหัสหลังจากที่เรา encode มา และ map ค่า key คู่กับ object นั้นๆ
+      final List<GroceryItem> loadedItems = [];
+      for (final item in listData.entries) {
+        final category = categories.entries
+            .firstWhere(
+                (catItem) => catItem.value.title == item.value['category'])
+            .value; // รายการแรกที่ตรงกับที่เลือก category
+        loadedItems.add(
+          GroceryItem(
+            id: item.key,
+            name: item.value['name'],
+            quantity: item.value['quantity'],
+            category: category,
+          ),
+        );
+      }
+
+      setState(() {
+        _groceryItems = loadedItems;
+        _isLoading = false;
+      });
+    } catch (error) {
+      setState(() {
+        _error = 'Something went wrong! Please try again later.';
+      });
+    }
+  }
 
   void _addItem() async {
     final newItem = await Navigator.of(context).push<GroceryItem>(
@@ -19,30 +118,49 @@ class _GroceryListState extends State<GroceryList> {
         builder: (ctx) => const NewItem(),
       ),
     );
-
     if (newItem == null) {
       return;
     }
-
     setState(() {
       _groceryItems.add(newItem);
     });
   }
 
-  void _removeItem(GroceryItem item) {
+  void _removeItem(GroceryItem item) async {
     // ฟังก์ชันลบสินค้า
+    final index = _groceryItems.indexOf(item);
     setState(() {
       _groceryItems.remove(item);
     });
+
+    final url = Uri.https(
+        'flutter-shopping-list-56d69-default-rtdb.firebaseio.com',
+        'shopping-list/${item.id}.json');
+
+    final response = await http.delete(url);
+
+    if (response.statusCode >= 400) {
+      // optional : show error message
+      setState(() {
+        _groceryItems.insert(index, item);
+      });
+    }
   }
 
   @override
   Widget build(BuildContext context) {
     Widget content = const Center(
-      child: Text('No items added yet.',
-      style: TextStyle(fontSize: 18),
+      child: Text(
+        'No items added yet.',
+        style: TextStyle(fontSize: 18),
       ),
-);
+    );
+
+    if (_isLoading) {
+      content = const Center(
+        child: CircularProgressIndicator(),
+      );
+    }
 
     if (_groceryItems.isNotEmpty) {
       content = ListView.builder(
@@ -52,37 +170,71 @@ class _GroceryListState extends State<GroceryList> {
             _removeItem(_groceryItems[index]);
           },
           key: ValueKey(_groceryItems[index].id),
-          child: ListTile(
-          title: Text(_groceryItems[index].name,
-          style: const TextStyle(fontSize: 22 ),
+          direction: DismissDirection.endToStart, // ปัดจากขวาไปซ้าย
+
+          child: SizedBox(
+            width: double.infinity,
+            child: Column(
+              children: [
+                InkWell(
+                  onTap: () => _showModal(context ,_groceryItems[index]),
+                  child: Card(
+                    shape: RoundedRectangleBorder(
+                      borderRadius:
+                          BorderRadius.circular(20), // มุมโค้งของการ์ด
+                    ),
+                    color: const Color.fromARGB(255, 238, 231, 231),
+                    elevation: 4,
+                    margin:
+                        const EdgeInsets.symmetric(horizontal: 20, vertical: 8),
+                    child: Padding(
+                      padding: const EdgeInsets.symmetric(
+                          horizontal: 8, vertical: 8),
+                      child: ListTile(
+                        title: Text(
+                          _groceryItems[index].name,
+                          style: const TextStyle(fontSize: 26),
+                        ),
+                        leading: Container(
+                          width: 30,
+                          height: 30,
+                          color: _groceryItems[index].category.color,
+                        ),
+                        trailing: Text(
+                          _groceryItems[index].quantity.toString(),
+                          style: const TextStyle(
+                              color: Color.fromARGB(255, 90, 90, 90),
+                              fontSize: 24),
+                        ),
+                      ),
+                    ),
+                  ),
+                ),
+              ],
+            ),
           ),
-          leading: Container(
-            width: 30,
-            height: 30,
-            color: _groceryItems[index].category.color,
-          ),
-          trailing: Text(
-            _groceryItems[index].quantity.toString(),
-            style: TextStyle(color: Colors.grey[600] , fontSize: 20),
-          ),
-        ),
         ),
       );
     }
 
+    if (_error != null) {
+      content = Center(child: Text(_error!));
+    }
+
     return Scaffold(
-      appBar: AppBar(
-        title: const Text('Your Products',
-        style: TextStyle(fontWeight: FontWeight.bold),
-        ),
-        actions: [
-          IconButton(
-            onPressed: _addItem,
-            icon: const Icon(Icons.add),
+        appBar: AppBar(
+          title: const Text(
+            'Your Groceries',
+            style: TextStyle(fontWeight: FontWeight.bold),
           ),
-        ],
-      ),
-    body: content
-    );
+          actions: [
+            IconButton(
+              onPressed: _addItem,
+              icon: const Icon(Icons.add),
+            ),
+          ],
+        ),
+        body: content
+        );
   }
 }

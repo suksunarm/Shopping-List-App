@@ -4,35 +4,35 @@ import 'package:shopping_list/models/category.dart';
 
 const categories = {
   Categories.vegetables: Category(
-    'Skincare',
+    'Fruits',
     Color.fromARGB(255, 0, 255, 128),
   ),
   Categories.fruit: Category(
-    'Hair Care',
+    'Vegetables',
     Color.fromARGB(255, 145, 255, 0),
   ),
   Categories.meat: Category(
-    'Makeup',
+    'Meat',
     Color.fromARGB(255, 255, 102, 0),
   ),
   Categories.dairy: Category(
-    'Nail Care',
+    'Sweets',
     Color.fromARGB(255, 0, 208, 255),
   ),
   Categories.carbs: Category(
-    'Body Ca re',
+    'Rice & Noodles',
     Color.fromARGB(255, 0, 60, 255),
   ),
   Categories.sweets: Category(
-    'Oral Care',
+    'Beverages',
     Color.fromARGB(255, 255, 149, 0),
   ),
-  Categories.spices: Category(
-    'Anti-Aging',
-    Color.fromARGB(255, 255, 187, 0),
-  ),
+  // Categories.spices: Category(
+  //   'Anti-Aging',
+  //   Color.fromARGB(255, 255, 187, 0),
+  // ),
   Categories.convenience: Category(
-    'Sun Care',
+    'Snacks',
     Color.fromARGB(255, 191, 0, 255),
   ),
   Categories.other: Category(
