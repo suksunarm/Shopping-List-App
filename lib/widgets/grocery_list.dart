@@ -15,6 +15,7 @@ class GroceryList extends StatefulWidget {
 class _GroceryListState extends State<GroceryList> {
   List<GroceryItem> _groceryItems = [];
   var _isLoading = true;
+  var isRemoving = false;
   String? _error;
 
   @override
@@ -23,9 +24,8 @@ class _GroceryListState extends State<GroceryList> {
     _loadItems();
   }
 
-
-  void _showModal(BuildContext context , GroceryItem item) {
-    final index  = _groceryItems.indexOf(item);
+  void _showModal(BuildContext context, GroceryItem item) {
+    final index = _groceryItems.indexOf(item);
     final name = item.name;
     final quantity = item.quantity;
 
@@ -34,11 +34,13 @@ class _GroceryListState extends State<GroceryList> {
       barrierDismissible: false, // ไม่ให้ปิดเมื่อคลิกที่ด้านนอกโมดอล
       builder: (BuildContext context) {
         return AlertDialog(
-          title: const Text('Do you want to delete',
-          style: TextStyle(fontSize: 24 , fontWeight: FontWeight.bold),
+          title: const Text(
+            'Do you want to delete',
+            style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold),
           ),
-          content:  Text('Your groceries are ${name} '+'\n'+' quantity : ${quantity}',
-          style: const TextStyle(fontSize: 20),
+          content: Text(
+            'Name : ${name} \nQuantity : ${quantity}',
+            style: const TextStyle(fontSize: 20),
           ),
           actions: <Widget>[
             TextButton(
@@ -46,23 +48,39 @@ class _GroceryListState extends State<GroceryList> {
                 _removeItem(_groceryItems[index]);
                 Navigator.of(context).pop();
               },
-              child:const Text('Yes',
-              style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+              style: TextButton.styleFrom(
+                  padding:
+                      const EdgeInsets.symmetric(horizontal: 20, vertical: 10),
+                  backgroundColor: Colors.green),
+              child: const Text(
+                'Yes',
+                style: TextStyle(
+                    fontSize: 18,
+                    fontWeight: FontWeight.bold,
+                    color: Colors.white),
               ),
             ),
             TextButton(
               onPressed: () {
                 Navigator.of(context).pop(); // ปิดโมดอล
               },
-              child:const Text('No',
-              style: TextStyle(fontSize: 18 , fontWeight: FontWeight.bold),
+              style: TextButton.styleFrom(
+                  padding:
+                      const EdgeInsets.symmetric(horizontal: 22, vertical: 10),
+                  backgroundColor: Colors.red),
+              child: const Text(
+                'No',
+                style: TextStyle(
+                    fontSize: 18,
+                    color: Colors.white,
+                    fontWeight: FontWeight.bold),
               ),
             ),
           ],
         );
       },
     );
-    }
+  }
 
   void _loadItems() async {
     final url = Uri.https(
@@ -177,7 +195,7 @@ class _GroceryListState extends State<GroceryList> {
             child: Column(
               children: [
                 InkWell(
-                  onTap: () => _showModal(context ,_groceryItems[index]),
+                  onTap: () => _showModal(context, _groceryItems[index]),
                   child: Card(
                     shape: RoundedRectangleBorder(
                       borderRadius:
@@ -198,7 +216,11 @@ class _GroceryListState extends State<GroceryList> {
                         leading: Container(
                           width: 30,
                           height: 30,
-                          color: _groceryItems[index].category.color,
+                          decoration: BoxDecoration(
+                            color: _groceryItems[index].category.color,
+                            borderRadius: BorderRadius.circular(
+                                20), 
+                          ),
                         ),
                         trailing: Text(
                           _groceryItems[index].quantity.toString(),
@@ -234,7 +256,6 @@ class _GroceryListState extends State<GroceryList> {
             ),
           ],
         ),
-        body: content
-        );
+        body: content);
   }
 }
