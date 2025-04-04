@@ -18,6 +18,7 @@ class _NewItemState extends State<NewItem> {
   final _formKey = GlobalKey<FormState>(); // สามารถเข้าถึงได้หมด
   var _enteredName = '';
   var _enteredQuantity = 1;
+  var enterImage = '';
   var _selectedCategory = categories[Categories.vegetables]!;
   var _isSending = false;
 
@@ -40,6 +41,7 @@ class _NewItemState extends State<NewItem> {
         body: json.encode(
           {
             'name': _enteredName,
+            'image': enterImage,
             'quantity': _enteredQuantity,
             'category': _selectedCategory.title
           },
@@ -57,6 +59,7 @@ class _NewItemState extends State<NewItem> {
         GroceryItem(
           id: resData['name'],
           name: _enteredName,
+          image: enterImage,
           quantity: _enteredQuantity,
           category: _selectedCategory,
         ),
@@ -81,7 +84,7 @@ class _NewItemState extends State<NewItem> {
           child: Column(
             children: [
               TextFormField(
-                maxLength: 50,
+                maxLength: 10,
                 decoration: const InputDecoration(
                   label: Text('Name'),
                 ),
@@ -90,7 +93,7 @@ class _NewItemState extends State<NewItem> {
                       value.isEmpty ||
                       value.trim().length == 1 ||
                       value.trim().length > 50) {
-                    return 'Must be between  1 and 50 characters.';
+                    return 'Must be between  1 and 10 characters.';
                   } // trim ลบข้อความที่ user กรอกทั้งหน้าและหลัง
                   return null;
                 },
@@ -99,6 +102,25 @@ class _NewItemState extends State<NewItem> {
                   //   return;
                   // }
                   _enteredName = value!;
+                },
+              ),
+              TextFormField(
+                decoration: const InputDecoration(
+                  label: Text('Image (must be input only url.)'),
+                ),
+                validator: (value) {
+                  if (value == null ||
+                      value.isEmpty
+                      ) {
+                    return 'Must be input your URL !!!';
+                  } // trim ลบข้อความที่ user กรอกทั้งหน้าและหลัง
+                  return null;
+                },
+                onSaved: (value) {
+                  // if (value == null) {
+                  //   return;
+                  // }
+                  enterImage = value!;
                 },
               ), // instead of TextField()
               Row(

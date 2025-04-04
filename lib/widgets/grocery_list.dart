@@ -16,6 +16,7 @@ class _GroceryListState extends State<GroceryList> {
   List<GroceryItem> _groceryItems = [];
   var _isLoading = true;
   var isRemoving = false;
+  var imagenotload = true;
   String? _error;
 
   @override
@@ -28,19 +29,25 @@ class _GroceryListState extends State<GroceryList> {
     final index = _groceryItems.indexOf(item);
     final name = item.name;
     final quantity = item.quantity;
+    // final image = item.image;
 
     showDialog(
       context: context,
       barrierDismissible: false, // ไม่ให้ปิดเมื่อคลิกที่ด้านนอกโมดอล
       builder: (BuildContext context) {
         return AlertDialog(
+          backgroundColor: const Color.fromARGB(255, 31, 31, 31),
+          shadowColor: const Color.fromARGB(255, 0, 0, 0),
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(40),
+          ),
           title: const Text(
             'Do you want to delete',
-            style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold),
+            style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold ,color: Colors.white),
           ),
           content: Text(
             'Name : ${name} \nQuantity : ${quantity}',
-            style: const TextStyle(fontSize: 20),
+            style: const TextStyle(fontSize: 20 , color: Color.fromARGB(255, 177, 175, 175)),
           ),
           actions: <Widget>[
             TextButton(
@@ -95,6 +102,7 @@ class _GroceryListState extends State<GroceryList> {
         });
       }
 
+
       if (response.body == 'null') {
         setState(() {
           _isLoading = false;
@@ -113,6 +121,7 @@ class _GroceryListState extends State<GroceryList> {
           GroceryItem(
             id: item.key,
             name: item.value['name'],
+            image: item.value['image'],
             quantity: item.value['quantity'],
             category: category,
           ),
@@ -191,35 +200,47 @@ class _GroceryListState extends State<GroceryList> {
           direction: DismissDirection.endToStart, // ปัดจากขวาไปซ้าย
 
           child: SizedBox(
-            width: double.infinity,
             child: Column(
+              mainAxisAlignment: MainAxisAlignment.start,
               children: [
                 InkWell(
                   onTap: () => _showModal(context, _groceryItems[index]),
                   child: Card(
                     shape: RoundedRectangleBorder(
                       borderRadius:
-                          BorderRadius.circular(20), // มุมโค้งของการ์ด
+                          BorderRadius.circular(60), // มุมโค้งของการ์ด
                     ),
                     color: const Color.fromARGB(255, 238, 231, 231),
                     elevation: 4,
                     margin:
-                        const EdgeInsets.symmetric(horizontal: 20, vertical: 8),
-                    child: Padding(
-                      padding: const EdgeInsets.symmetric(
-                          horizontal: 8, vertical: 8),
+                        const EdgeInsets.symmetric(horizontal: 80, vertical: 8),
+                   
                       child: ListTile(
-                        title: Text(
-                          _groceryItems[index].name,
-                          style: const TextStyle(fontSize: 26),
+                        title: Column(
+                          mainAxisAlignment: MainAxisAlignment.center,
+                          crossAxisAlignment: CrossAxisAlignment.center,
+                          children: [
+                            Text(
+                              _groceryItems[index].name,
+                              style: const TextStyle(fontSize: 26),
+                            ),
+                            const SizedBox(height: 2),
+                            Container(
+                              decoration: BoxDecoration(
+                                borderRadius: BorderRadius.circular(360),
+                                image: DecorationImage(image: NetworkImage(_groceryItems[index].image ))
+                              ),
+                              width: 100,
+                              height: 100,
+                            )
+                          ],
                         ),
                         leading: Container(
                           width: 30,
                           height: 30,
                           decoration: BoxDecoration(
                             color: _groceryItems[index].category.color,
-                            borderRadius: BorderRadius.circular(
-                                20), 
+                            borderRadius: BorderRadius.circular(20),
                           ),
                         ),
                         trailing: Text(
@@ -231,7 +252,6 @@ class _GroceryListState extends State<GroceryList> {
                       ),
                     ),
                   ),
-                ),
               ],
             ),
           ),
