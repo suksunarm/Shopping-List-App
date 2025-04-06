@@ -5,6 +5,7 @@ import 'package:shopping_list/models/category.dart';
 import 'package:shopping_list/models/grocery_item.dart';
 import 'package:http/http.dart' as http; //เปลี่ยนที่ import มา ให้เป็นชื่อ http
 
+
 class NewItem extends StatefulWidget {
   const NewItem({super.key});
 
@@ -128,10 +129,10 @@ class _NewItemState extends State<NewItem> {
                 children: [
                   Expanded(
                     child: TextFormField(
+                      keyboardType: TextInputType.number,
                       decoration: const InputDecoration(
                         label: Text('Quantity'),
                       ),
-                      keyboardType: TextInputType.number,
                       initialValue: _enteredQuantity.toString(),
                       validator: (value) {
                         if (value == null ||

@@ -4,6 +4,7 @@ import 'package:shopping_list/models/grocery_item.dart';
 import 'package:shopping_list/widgets/new_item.dart';
 import 'package:http/http.dart' as http;
 import 'dart:convert';
+import 'package:google_fonts/google_fonts.dart';
 
 class GroceryList extends StatefulWidget {
   const GroceryList({super.key});
@@ -46,7 +47,7 @@ class _GroceryListState extends State<GroceryList> {
             style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold ,color: Colors.white),
           ),
           content: Text(
-            'Name : ${name} \nQuantity : ${quantity}',
+            'Name : $name \nQuantity : $quantity',
             style: const TextStyle(fontSize: 20 , color: Color.fromARGB(255, 177, 175, 175)),
           ),
           actions: <Widget>[
@@ -213,7 +214,7 @@ class _GroceryListState extends State<GroceryList> {
                     color: const Color.fromARGB(255, 238, 231, 231),
                     elevation: 4,
                     margin:
-                        const EdgeInsets.symmetric(horizontal: 80, vertical: 8),
+                        const EdgeInsets.symmetric(horizontal: 50, vertical: 8),
                    
                       child: ListTile(
                         title: Column(
@@ -222,7 +223,9 @@ class _GroceryListState extends State<GroceryList> {
                           children: [
                             Text(
                               _groceryItems[index].name,
-                              style: const TextStyle(fontSize: 26),
+                              style: GoogleFonts.kanit(
+                                textStyle: const TextStyle(fontSize: 28 , fontWeight: FontWeight.bold)
+                              ),
                             ),
                             const SizedBox(height: 2),
                             Container(
@@ -245,9 +248,11 @@ class _GroceryListState extends State<GroceryList> {
                         ),
                         trailing: Text(
                           _groceryItems[index].quantity.toString(),
-                          style: const TextStyle(
+                          style: GoogleFonts.kanit(
+                            textStyle: const TextStyle(
                               color: Color.fromARGB(255, 90, 90, 90),
-                              fontSize: 24),
+                              fontSize: 26)
+                          ),
                         ),
                       ),
                     ),
